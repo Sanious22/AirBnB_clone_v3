@@ -1,0 +1,413 @@
+info:
+  title: HBNB
+  description: Holberton AirBnB Clone API
+  version: 0.4
+
+basePath: /api/v1
+schemes:
+  - http
+
+definitions:
+  Amenity:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+  BaseModel:
+    type: object
+    properties:
+      id:
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+      created_at:
+        type: string
+      updated_at:
+        type: string
+  City:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+      state_id:
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+  Place:
+    type: object
+    required:
+      - name
+      - user_id
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      city_id:
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+      number_rooms:
+        type: integer
+      number_bathrooms:
+        type: integer
+      price_by_night:
+        type: integer
+      user_id:
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+  Review:
+    type: object
+    required:
+      - text
+      - user_id
+    properties:
+      place_id:
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+      text:
+        type: string
+      user_id:
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+  State:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+  User:
+    type: object
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+        format: password
+
+paths:
+  /states:
+    get:
+      summary: Lists all state objects
+      tags:
+        - states
+      responses:
+        200:
+          description: list of all state objects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/State'
+    post:
+      summary: Create a new state object
+      parameters:
+        - name: state
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/State'
+      tags:
+        - states
+      responses:
+        201:
+          description: state successfully created
+          schema:
+            allOf:
+              - $ref: '#/definitions/BaseModel'
+              - $ref: '#/definitions/State'
+        400:
+          description: request body not JSON or name not given
+
+  /states/{state_id}:
+    parameters:
+      - name: state_id
+        in: path
+        required: true
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+    delete:
+      summary: Delete a state by ID
+      tags:
+        - states
+      responses:
+        200:
+          description: state successfully deleted
+          schema:
+            type: object
+        404:
+          description: state ID not found
+    get:
+      summary: Get a state by ID
+      tags:
+        - states
+      responses:
+        200:
+          description: the state
+          schema:
+            $ref: '#/definitions/State'
+        404:
+          description: state ID not found
+    put:
+      summary: Update an existing state
+      tags:
+        - states
+      responses:
+        200:
+          description: state successfully updated
+          schema:
+            $ref: '#/definitions/State'
+        400:
+          description: request body not JSON
+        404:
+          description: state ID not found
+
+  /states/{state_id}/cities:
+    parameters:
+      - name: state_id
+        in: path
+        required: true
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+    get:
+      summary: Get all cities in a state
+      tags:
+        - cities
+        - states
+      responses:
+        200:
+          description: list of cities in the state
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/City'
+        404:
+          description: state ID not found
+    post:
+      summary: Add a new city to a state
+      tags:
+        - cities
+        - states
+      responses:
+        201:
+          description: city created successfully
+          schema:
+            $ref: '#/definitions/City'
+        400:
+          description: request body not JSON or name missing
+        404:
+          description: state ID not found
+
+  /cities/{city_id}:
+    parameters:
+      - name: city_id
+        in: path
+        required: true
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+    delete:
+      summary: Delete a city by ID
+      tags:
+        - cities
+      responses:
+        200:
+          description: city successfully deleted
+          schema:
+            type: object
+        404:
+          description: city ID not found
+    get:
+      summary: Get a city by ID
+      tags:
+        - cities
+      responses:
+        200:
+          description: city description
+          schema:
+            $ref: '#/definitions/City'
+        404:
+          description: city ID not found
+    put:
+      summary: Update an existing city
+      tags:
+        - cities
+      responses:
+        200:
+          description: city successfully updated
+          schema:
+            $ref: '#/definitions/City'
+        400:
+          description: request body not JSON
+        404:
+          description: city ID not found
+
+  /amenities:
+    get:
+      summary: List all amenity objects
+      tags:
+        - amenities
+      responses:
+        200:
+          description: list of city objects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Amenity'
+    post:
+      summary: Create a new amenity object
+      tags:
+        - amenities
+      responses:
+        201:
+          description: amenity successfully created
+          schema:
+            $ref: '#/definitions/Amenity'
+        400:
+          description: request body not JSON or name not given
+
+  /amenities/{amenity_id}:
+    parameters:
+      - name: amenity_id
+        in: path
+        required: true
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+    delete:
+      summary: Delete an amenity object by ID
+      tags:
+        - amenities
+      responses:
+        200:
+          description: amenity object successfully deleted
+          schema:
+            type: object
+        404:
+          description: amenity ID not found
+    get:
+      summary: Get an amenity object by ID
+      tags:
+        - amenities
+      responses:
+        200:
+          description: an amenity object
+          schema:
+            $ref: '#/definitions/Amenity'
+        404:
+          description: amenity ID not found
+    put:
+      summary: Update an existing amenity object
+      tags:
+        - amenities
+      responses:
+        200:
+          description: amenity successfully updated
+          schema:
+            $ref: '#/definitions/Amenity'
+        400:
+          description: request body not JSON
+        404:
+          description: amenity ID not found
+
+  /users:
+    get:
+      summary: List all user objects
+      tags:
+        - users
+      responses:
+        200:
+          description: list of user objects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+    post:
+      summary: Create a new user object
+      tags:
+        - users
+      responses:
+        201:
+          description: user successfully created
+          schema:
+            $ref: '#definitions/User'
+        400:
+          description: request body not JSON or email or password missing
+
+  /users/{user_id}:
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+    delete:
+      summary: Delete a user object by ID
+      tags:
+        - users
+      responses:
+        200:
+          description: user successfully deleted
+          schema:
+            type: object
+        404:
+          description: user ID not found
+    get:
+      summary: Get a user object by ID
+      tags:
+        - users
+      responses:
+        200:
+          description: the user object
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: user ID not found
+    put:
+      summary: Update an existing user object
+      tags:
+        - users
+      responses:
+        200:
+          description: user successfully updated
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: request body not JSON
+        404:
+          description: user ID not found
+
+  /cities/{city_id}/places:
+    parameters:
+      - name: city_id
+        in: path
+        required: true
+        type: string
+        pattern: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+    get:
+      summary: List all places in a city
+      tags:
+        - cities
+        - places
+      responses:
+        200:
+          description: list of places in city
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Place'
+        404:
+          description: city ID not found
+    post:
+      summary: Add a new place to a city
+      tags:
+        - cities
+        - places
+      responses:
+        201:
+          description: place successfully added to city
+          schema:
+            $ref: '#/definitions/Place'
+        400:
+          description: request body not JSON or city_id or user_id not given
+        404:
+          description: user ID not found or city ID not found
